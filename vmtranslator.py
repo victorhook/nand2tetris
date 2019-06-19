@@ -1,16 +1,17 @@
 import os
 import backend
 import sys
-"""
-RAM ADDRESSES		Usage
-0-15				Virtual register
-16-255				Static variables
-256-2047			Stack
-2048-16483			Heap
-16384-24575			Memory mapped I/O
 
 """
-
+R0 = SP
+R1 = LCL
+R2 = ARG
+R3 = THIS
+R4 = THAT
+R5-12 = temp
+R13-15 = free
+pointer => R3 + i
+"""
 
 class Parser:
 
@@ -25,8 +26,8 @@ class Parser:
 		
 
 	def open(self):
-		#file = "test"
-		file = input("What file do you want to translate? ")
+		file = "StackTest.vm"
+		#file = input("What file do you want to translate? ")
 		self.file_name = file
 
 		try:
@@ -116,30 +117,50 @@ class CodeWriter:
 
 
 	def write_arithmetic(self, arg1):
-		return backend.Code.arithmetic[arg1]
+		# 
+		instruction = backend.Code.arithmetic[arg1]
+		i = backend.Code.arithmetic["comp_counter"]
+
+		if arg1 == "lt" or arg1 == "gt" or arg1 == "eq":
+			instruction = instruction.replace("_i", str(i))
+
+			if arg1 == "lt":
+				instruction = instruction.replace("condition", "JLT")
+
+			elif arg1 == "gt":
+				instruction = instruction.replace("condition", "JGT")
+
+			elif arg1 == "eq":
+				instruction = instruction.replace("condition", "JEQ")
+
+		backend.Code.arithmetic["comp_counter"] += 1
+
+		return instruction
 
 
 	def write_push_pop(self, arg1, arg2, i):
+		# Using the backend code tables to grab the correct translation of
+		# the Push or Pop commands.
+
+		instruction = backend.Code.push_pop[arg1].replace("i", i)
+
 		if arg2 == "constant":
-			assembly = backend.Code.push_pop[arg1].replace("i", "{}".format(i)).replace("@segment\nD=D+M\n", "")
+			instruction = backend.Code.push_pop[arg2].replace("i", i)
 
 		else:
-			assembly = backend.Code.push_pop[arg1]
-			assembly = assembly.replace("i", "{}".format(i)).replace("segment", "{}".format(backend.Code.second_arguments[arg2]))
-		
-		return assembly
+			instruction = instruction.replace("segment", backend.Code.second_arguments[arg2])
+
+			if arg2 == "temp" or arg2 == "pointer":
+				instruction = instruction.replace("D+M", "D+A")
+
+		return instruction
 
 
 	def close(self, instructions):
 		# Save all the code as a string 
-		save = ""
-
-		for ins in instructions:
-			ins = parser.command + "\n" + ins + "\n//-------\n\n"
-			save += ins
 
 		with open(self.file, "w") as f:
-			f.write(save)
+			f.write(instructions)
 
 		if os.path.exists(self.file):
 			print("File {} was saved correctly.".format(self.file))
@@ -148,7 +169,7 @@ class CodeWriter:
 
 parser = Parser()
 code = CodeWriter(parser.file_name)
-parser.translated_text = []
+parser.translated_text = ""
 
 while True:
 
@@ -181,7 +202,8 @@ while True:
 
 	# Appends the instruction to the total code (list). Then pops the command
 	# to continue the loop.
-	parser.translated_text.append(instruction)
+	instruction = "//" +  parser.command + "\n" + instruction + "\n//-------\n"
+	parser.translated_text += instruction
 	parser.text.pop(0)
 
 code.close(parser.translated_text)

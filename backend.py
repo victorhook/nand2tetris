@@ -14,37 +14,35 @@ second_argument = ["argument", "local", "static", "constant", "this", "that", "p
 
 class Code:
 
-	
-	eq1 = "@R13\nM=-1\n@R14\nM=0"
-	eq2 = "\n@SP\nM=M-1\nA=M\nD=M\nA=A-1\nD=D-M\n@EQ\nD;JEQ\n@!EQ\n0;JMP"
-	eq3 = "\n(EQ)\n@R13\nD=M\n@END\n0;JMP"
-	eq4 = "\n(!EQ)\n@R14\nD=M\n(END)\n@SP\nA=M-1\nM=D"
-	eq = eq1 + eq2 + eq3 + eq4
-	gt = eq.replace("EQ", "GT")
-	lt = eq.replace("EQ", "LT")
-	
+	first = "@SP\nM=M-1\nA=M-1\nD=M\nA=A+1\nD=D-M\n"
+	second = "@gt_true_i\nD;condition\nD=0\n@end_i\n0;JMP\n"
+	third = "(gt_true_i)\nD=-1\n(end_i)\n@SP\nA=M-1\nM=D"
+	eq_gt_lt = first + second + third
+
 
 	arithmetic = {
-	"add": "@SP\nM=M-1\nA=M\nD=M\nA=A-1\nM=D+M",
+	"add": "@SP\nAM=M-1\nD=M\nA=A-1\nM=D+M",
 	"sub": "@SP\nM=M-1\nA=M-1\nD=M\nA=A+1\nD=D-M\nA=A-1\nM=D",
 	"neg": "@SP\nA=M\nM=-M",
-	"eq": eq,
-	"gt": gt,
-	"lt": lt,
+	"eq": eq_gt_lt,
+	"gt": eq_gt_lt,
+	"lt": eq_gt_lt,
 	"and": "@SP\nAM=M-1\nD=M\nA=A-1\nM=D&M",
 	"or": "@SP\nAM=M-1\nD=M\nA=A-1\nD=D|M",
-	"not": "@SP\nA=M-1\nM=!M"
+	"not": "@SP\nA=M-1\nM=!M",
+	"comp_counter": 0
 	}
 
 	push_pop = {
-	"push": "@i\nD=A\n@segment\nD=D+M\n@SP\nA=M\nM=D\n@SP\nM=M+1",
-	"pop": "@i\nD=A\n@segment\nD=D+M\n@R13\nM=D\n@SP\nM=M-1\nA=M\nD=M\n@R13\nA=M\nM=D"
+	"push": "@i\nD=A\n@segment\nA=D+M\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1",
+	"pop": "@i\nD=A\n@segment\nD=D+M\n@R13\nM=D\n@SP\nAM=M-1\nD=M\n@R13\nA=M\nM=D",
+	"constant": "@i\nD=A\n@SP\nA=M\nM=D\n@SP\nM=M+1"
 	}
 
 	second_arguments = {
 	"argument": "ARG",
 	"local": "LCL",
-	"static": "static",
+	"static": "16",
 	"this": "THIS",
 	"that": "THAT",
 	"pointer": "3",
