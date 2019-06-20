@@ -15,20 +15,20 @@ second_argument = ["argument", "local", "static", "constant", "this", "that", "p
 class Code:
 
 	first = "@SP\nM=M-1\nA=M-1\nD=M\nA=A+1\nD=D-M\n"
-	second = "@gt_true_i\nD;condition\nD=0\n@end_i\n0;JMP\n"
-	third = "(gt_true_i)\nD=-1\n(end_i)\n@SP\nA=M-1\nM=D"
+	second = "@cond_true_i\nD;condition\nD=0\n@end_i\n0;JMP\n"
+	third = "(cond_true_i)\nD=-1\n(end_i)\n@SP\nA=M-1\nM=D"
 	eq_gt_lt = first + second + third
 
 
 	arithmetic = {
 	"add": "@SP\nAM=M-1\nD=M\nA=A-1\nM=D+M",
 	"sub": "@SP\nM=M-1\nA=M-1\nD=M\nA=A+1\nD=D-M\nA=A-1\nM=D",
-	"neg": "@SP\nA=M\nM=-M",
+	"neg": "@SP\nA=M-1\nM=-M",
 	"eq": eq_gt_lt,
 	"gt": eq_gt_lt,
 	"lt": eq_gt_lt,
 	"and": "@SP\nAM=M-1\nD=M\nA=A-1\nM=D&M",
-	"or": "@SP\nAM=M-1\nD=M\nA=A-1\nD=D|M",
+	"or": "@SP\nAM=M-1\nD=M\nA=A-1\nM=D|M",
 	"not": "@SP\nA=M-1\nM=!M",
 	"comp_counter": 0
 	}

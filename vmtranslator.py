@@ -26,8 +26,8 @@ class Parser:
 		
 
 	def open(self):
-		file = "StackTest.vm"
-		#file = input("What file do you want to translate? ")
+		#file = "StackTest.vm"
+		file = input("What file do you want to translate? ")
 		self.file_name = file
 
 		try:
@@ -49,7 +49,7 @@ class Parser:
 				raise FileNotFoundError("File not found.")
 
 		except FileNotFoundError:
-			print("File can't be opened. Check if it exists")
+			print("\nFile can't be opened. Check if it exists")
 			sys.exit()
 
 	def trim_text(self):
@@ -163,7 +163,8 @@ class CodeWriter:
 			f.write(instructions)
 
 		if os.path.exists(self.file):
-			print("File {} was saved correctly.".format(self.file))
+			print("\nFile {} was saved correctly in filepath:".format(self.file))
+			print(os.getcwd() + self.file)
 
 
 
