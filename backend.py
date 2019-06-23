@@ -3,8 +3,8 @@ commands = {
 	"C_PUSH": ["push"],
 	"C_POP": ["pop"],
 	"C_LABEL": ["label"],
-	"C_GOTO": ["goto"],
 	"C_IF": ["if"],
+	"C_GOTO": ["goto"],
 	"C_FUNCTION": ["function"],
 	"C_RETURN": ["return"],
 	"C_CALL": ["call"]
@@ -36,7 +36,11 @@ class Code:
 	push_pop = {
 	"push": "@i\nD=A\n@segment\nA=D+M\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1",
 	"pop": "@i\nD=A\n@segment\nD=D+M\n@R13\nM=D\n@SP\nAM=M-1\nD=M\n@R13\nA=M\nM=D",
-	"constant": "@i\nD=A\n@SP\nA=M\nM=D\n@SP\nM=M+1"
+	"constant": "@i\nD=A\n@SP\nA=M\nM=D\n@SP\nM=M+1",
+	"static": {"push": "@variable\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1",
+				"pop": "@variable\nD=A\n@R13\nM=D\n@SP\nAM=M-1\nD=M\n@R13\nA=M\nM=D"
+	}
+
 	}
 
 	second_arguments = {
@@ -49,3 +53,67 @@ class Code:
 	"temp": "5"
 	}
 
+	def label(instruction):
+		return instruction.split("label ")[1]
+"""
+# push return-address
+@SP
+
+# push LCL
+@local
+D=M
+@SP
+A=M
+M=D
+@SP
+M=M+1
+
+# push ARG
+@argument
+D=M
+@SP
+A=M
+M=D
+@SP
+M=M+1
+
+# push this
+@this
+D=M
+@SP
+A=M
+M=D
+@SP
+M=M+1
+
+# push that
+@that
+D=M
+@SP
+A=M
+M=D
+@SP
+M=M+1
+
+# arg = SP-n-5
+@SP
+D=M
+@n
+D=D-A
+@5
+D=D-A
+@argument
+M=D
+
+# LCL = SP
+@SP
+D=M
+@LCL
+M=D
+
+# goto f
+@f
+0;JMP
+
+# (return-address)
+"""
