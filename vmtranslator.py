@@ -29,7 +29,7 @@ class Parser:
 
 
 	def open(self):
-		file = "BasicLoop.vm"
+		file = "SimpleFunction.vm"
 		#file = input("What file do you want to translate? ")
 		self.file_name = file
 		all_files = []
@@ -238,16 +238,16 @@ class CodeWriter:
 			return_address = "@SP\nA=M\nM=M\n"
 
 			# Save segments
-			push_lcl = "@local\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n"
-			push_arg = "@argument\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n"
-			push_this = "@this\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n"
-			push_that = "@that\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n"
+			push_lcl = "@LCL\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n"
+			push_arg = "@ARG\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n"
+			push_this = "@THIS\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n"
+			push_that = "@THAT\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n"
 
 			# ARG = SP-5-nargs
 			reposition_arg = "@SP\nD=M\n@5\nD=D-A\n@%s\nD=D-A\n@argument\nM=D\n" % nargs
 
 			# LCL = SP
-			lcl = "@SP\nD=M\n@local\nM=D\n"
+			lcl = "@SP\nD=M\n@LCL\nM=D\n"
 
 			# goto functionName
 			goto_func = "@%s\n0;JMP" % funcname
@@ -272,28 +272,31 @@ class CodeWriter:
 
 	def write_return(self):
 		# end frame = LCL
-		end_frame = "@LCL\nD=M\n@temp\nM=D\n"
+		frame = "5"
+		ret = "6"
+
+		end_frame = "//endframe, returnaddress, *ARG = pop() and sp_reset\n@LCL\nD=M\n@%s\nM=D\n" % frame
 
 		# return address = *(end_frame - 5)
-		return_address = "@temp\nD=M\n@5\nA=D-A\nD=M\n@temp\nM=D\n"
+		return_address = "@%s\nD=M\n@5\nA=D-A\nD=M\n@%s\nM=D\n" % (frame, ret)
 
 		# *ARG = pop()
-		return_value = "@SP\nA=M-1\nD=M\n@argument\nA=M\nM=D\n"
+		return_value = "@SP\nA=M-1\nD=M\n@ARG\nA=M\nM=D\n"
 
 		# Reposition SP of the caller
-		sp_reset = "@argument\nD=M+1\n@SP\nM=D\n"
+		sp_reset = "@ARG\nD=M+1\n@SP\nM=D\n"
 
 		# Restores segments
-		that = "@local\nA=M-1\nM=D\nD=M\n@that\nM=D\n"
-		this = "@local\nD=M\n@2\nA=D-A\nM=D\n@this\nM=D\n"
-		arg = "@local\nD=M\n@3\nA=D-A\nM=D\n@argument\nM=D\n"
-		lcl = "@local\nD=M\n@4\nA=D-A\nM=D\n@local\nM=D\n"
+		that = "//Restores segments\n@%s\nA=M-1\nD=M\n@THAT\nM=D\n" % frame
+		this = "@%s\nD=M\n@2\nA=D-A\nD=M\n@THIS\nM=D\n" % frame
+		arg = "@%s\nD=M\n@3\nA=D-A\nD=M\n@ARG\nM=D\n" % frame
+		lcl = "@%s\nD=M\n@4\nA=D-A\nD=M\n@LCL\nM=D\n" % frame
 
 		# goto return address
-		goto_return = "@temp\n0;JMP"
+		goto_return = "@%s\nA=M\n0;JMP" % ret
 
 		instruction = end_frame + return_address + return_value + sp_reset
-		instruction += that + this + that + arg + lcl + goto_return
+		instruction += that + this + arg + lcl + goto_return
 		return instruction	
 
 	def write_function(self, funcname, nargs, file):
@@ -303,7 +306,7 @@ class CodeWriter:
 
 		instruction = "(%s.%s)\n" % (file, funcname)
 		for arg in range(int(nargs)):
-			set_vars = "@%s\nD=A\n@local\nA=D+M\nM=0\n" % arg
+			set_vars = "@%s\nD=A\n@LCL\nA=D+M\nM=0\n" % arg
 			instruction += set_vars
 
 		return instruction
