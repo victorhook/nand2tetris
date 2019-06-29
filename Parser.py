@@ -66,7 +66,6 @@ class Parser:
 
 
 	def has_more_commands(self, file):
-
 		if file.commands:
 			return True
 		return False

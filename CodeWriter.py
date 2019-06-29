@@ -8,7 +8,7 @@ class CodeWriter:
 		instruction = "@%s\nD=A\n@%s\nA=D+M\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n" % (number, segment)
 
 		if number == 0:
-			instruction = "@%s\nA=M\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n" % segment
+			instruction = "@%s\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n" % segment
 
 		if segment == "constant":
 			instruction = "@%s\nD=A\n@SP\nA=M\nM=D\n@SP\nM=M+1\n" % number
@@ -42,7 +42,6 @@ class CodeWriter:
 	def write_function(file):
 		func_name = file.current_command[1]
 		nargs = file.current_command[2]
-
 		instruction = "(%s)\n" % func_name
 
 		for arg in range(int(nargs)):
@@ -56,9 +55,7 @@ class CodeWriter:
 
 		return_label = file.file_name.split(".vm")[0] + "$ret." + str(file.return_counter)
 		file.return_counter += 1
-
-		instruction = "@%s\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n" % return_label
-
+		instruction = "@%s\nD=A\n@SP\nA=M\nM=D\n@SP\nM=M+1\n" % return_label	# push ret addr
 		instruction += CodeWriter.push(0, "LCL")
 		instruction += CodeWriter.push(0, "ARG")
 		instruction += CodeWriter.push(0, "THIS")
@@ -91,8 +88,9 @@ class CodeWriter:
 		return instruction
 		
 	def write_label(file):
+		function_name = file.last_function
 		label = file.current_command[1]
-		return "(%s)\n" % label
+		return "(%s$%s)\n" % (function_name, label)	
 
 	def write_arithmetic(file):
 		cmd = file.current_command[0]
