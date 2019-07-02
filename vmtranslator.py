@@ -7,7 +7,7 @@ from Parser import Parser
 
 if __name__ == "__main__":
 
-	parser = Parser(r"C:\Users\vicke\Programmering\nand2tetris\projects\08\FunctionCalls\NestedCall")
+	parser = Parser(r"C:\Users\vicke\Programmering\nand2tetris\projects\08\ProgramFlow\FibonacciSeries")
 
 	finished_text = ""
 
@@ -33,7 +33,7 @@ if __name__ == "__main__":
 
 			elif cmd_type == "C_FUNCTION":
 				file.last_function = file.current_command[1]
-				instruction = CodeWriter.write_function(file)
+				instruction = CodeWriter.write_function(file)		
 
 			elif cmd_type == "C_CALL":
 				instruction = CodeWriter.write_call(file)

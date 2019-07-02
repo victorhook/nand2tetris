@@ -23,7 +23,7 @@ segment_table = {
 	"local": "LCL",
 	"this": "THIS",
 	"that": "THAT",
-	"pointer": "3",
+	"pointer": "pointer",
 	"temp": "5",
 	"static": "16",
 	"constant": "constant"
@@ -31,7 +31,7 @@ segment_table = {
 
 arithmetic_table = {
 	"add": "@SP\nAM=M-1\nD=M\nA=A-1\nM=D+M\n",
-	"sub": "@SP\nM=M-1\nA=M-1\nD=M\nA=A+1\nD=D-M\nA=A-1\nM=D\n",
+	"sub": "@SP\nAM=M-1\nD=M\nA=A-1\nM=M-D\n",
 	"neg": "@SP\nA=M-1\nM=-M\n",
 	"and": "@SP\nAM=M-1\nD=M\nA=A-1\nM=D&M\n",
 	"or": "@SP\nAM=M-1\nD=M\nA=A-1\nM=D|M\n",
@@ -54,7 +54,10 @@ def comparator(file):
 	else:
 		jump = "JEQ"
 
-	instruction = "@SP\nAM=M-1\nD=M\nA=A+1\nD=D-M\n@%s\nD;%s\nD=0\n@%s\n0;JMP\n" % (if_true, jump, end)
-	instruction += "(%s)\nD=-1\n(%s)\n@SP\nA=M-1\nM=D\n" % (if_true, end)
+	instruction = f"@SP\nAM=M-1\nD=M\nA=A-1\nD=M-D\n@{if_true}\nD;{jump}\nD=0\n@{end}\n0;JMP\n"
+	instruction += f"({if_true})\nD=-1\n({end})\n@SP\nA=M-1\nM=D\n" 
 
 	return instruction
+
+#	instruction = f"@SP\nAM=M-1\nA=A-1\nD=M\nA=A+1\nD=D-M\n@%s\nD;%s\nD=0\n@%s\n0;JMP\n" % (if_true, jump, end)
+#	instruction += f"(%s)\nD=-1\n(%s)\n@SP\nA=M-1\nM=D\n" % (if_true, end)
