@@ -194,6 +194,8 @@ class CodeCreator:
         self.output_code.extend((first_line, second_line))
 
         for index, data in enumerate(self.binaries):
+            if data == 65535:
+                data = "-1"
             code = "\tdo Memory.poke(memAddr + {}, {});".format(index*32, data)
             self.output_code.append(code)
 

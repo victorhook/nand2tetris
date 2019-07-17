@@ -1,0 +1,19 @@
+function Test.new 0
+push constant 3
+call Memory.alloc 1
+pop pointer 0
+push constant 3
+pop this 0
+push constant 4
+pop this 1
+push this 0
+push this 1
+add
+pop this 2
+push pointer 0
+return
+function Test.giveZ 0
+push argument 0
+pop pointer 0
+push this 2
+return

@@ -1,0 +1,17 @@
+class Test {
+	field int x;
+	field int y;
+	field int z;
+
+	constructor Test new() {
+		let x = 3;
+		let y = 4;
+		let z = x + y;
+		return this;
+	}
+
+	method int giveZ() {
+		return z;
+	}
+
+}

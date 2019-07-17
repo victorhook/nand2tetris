@@ -1,71 +1,14 @@
-/** 
-This == current object
- --SUBROUTINES-- 
-- Functions
-- Methods
-- Constructors
-
- --VARIABLES-- 
- - field
- - static
- - local
- - parameter variables (args)
-
---DATA TYPES--
-- int, 16-bit 2's complements
-- char, unicode character
-- boolean, true & false
-- object type -> name of class
-
---OBJECT TYPES--
-var Employee e;                 - Variable that contains a null reference
-let e = Employee.new("victor")  - New object created. e now holds the base address of the 
-                                - memory segments allocated to the object
-let f = e;                      - This is only the reference. No NEW object is created
-
-
---ARRAY--
-var Array mylist;                         - Creates a reference
-let mylist = Array.new(length-of-array);  - Constructs the array
-- Indexed by mylist[x]
-
---STRINGS--
-var String mystring;
-let mystring = "Hello World!";
-
-var char character;
-let character = mystring.charAt(6);  -> "W"
-
-
---TYPE CONVERSIONS--
-var char c; var String s;
-let c = 33; -> c="A"
-- or equivalently:
-let s = "A"; let c = s.charAt(0); -> c="A"
-
-var Array a;
-let a = 5000;
-let a[100] = 77;  -> RAM[5100] = 77
-
-// Assume class Complex has two int fields: "re" & "im"
-var Complex c; var Array a;
-let a = Array.new(2);
-let a[0] = 7;
-let a[1] = 8;
-let c = a;   -> c = Complex(7,8)
-
-
-
-*/
 class Main {
+
     function void main() {
-        var Fraction a, b, c;
-        let a = Fraction.new(2,3);
-        let b = Fraction.new(1,5);
-        let c = a.plus(b);
-        do c.print();
+		var Test obj;
+		var int z;
+		let obj = Test.new();
+
+		let z = obj.giveZ();
+		do Output.printString(z);
+
+
         return;
-
     }
-
 }
