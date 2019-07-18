@@ -69,16 +69,29 @@ class JackAnalyzer:
 class JackTokenizer:
 
     def __init__(self, file):
-        #self.file = self.remove_whitespace(file)
-        print(file.content)
-    
-    def remove_whitespace(self, file):
+        self.file = self.clean_text(file)
+        print(self.file.content)
+
+    def clean_text(self, file):
+        """
+        Removes all comments /** ... */, /* ... */ or // ...
+        Then removes all white space, both using the re module
+        """
         text = "".join(file.content)
-        content = re.sub(r"[\t\n\s*]", "", text)
 
+        pattern_api_or_standard_comment = re.compile(r"/\*{1,2}(.|\n)*\*/")
+        pattern_slash_comment = re.compile("//.*")
+
+        content = re.sub(pattern_slash_comment, "", text)
+        content = re.sub(pattern_api_or_standard_comment, "", content)
+
+        # This is the text with space included, for easier debugging
+        file.debug_content = content    
+        content = re.sub(r"[\t\n\s*]", "", content)
+        
         file.content = content
-        return file
 
+        return file
 
     def has_more_tokens(self):
         if self.tokens:
