@@ -1,61 +1,55 @@
-import os
+import re
 
-class File:
+text = """
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/10/ExpressionLessSquare/Main.jack
 
-    def __init__(self, name, path, content):
-        self.name = name
-        self.path = path
-        self.content = content
+/** Expressionless version of projects/10/Square/Main.jack. */
 
+class Main {
+    static boolean test;    // Added for testing -- there is no static keyword
+                            // in the Square files.
 
-    def __repr__(self):
-        return self.name
+    function void main() {
+        var SquareGame game;
+        let game = game;
+        do game.run();
+        do game.dispose();
+        return;
+    }
 
-
-class JackAnalyer:
-
-    def __init__(self, input):
-        
-        self.files = self.open_input(input)
-        print(self.files)
-
-    def open_input(self, input):
-        opened_files = []
-
-        if os.path.exists(input):
-            abspath = os.path.abspath(input)
-
-                # Opens a directory input
-            if os.path.isdir(input):
-                for each_file in os.listdir(input):
-                    name, ext = os.path.splitext(each_file)
-                    if ext == ".jack":
-                        name += ext
-                        path = os.path.join(abspath, name)
-                        with open(path) as f:
-                            content = f.read()
-                            path = path.replace(".jack", ".xml")
-                            each_file = File(name, path, content)
-                            opened_files.append(each_file)
-
-                    # Opens a single file input 
-            else:
-                name, ext = os.path.splitext(input)
-                if ext == ".jack":
-                    name += ext
-                    with open(abspath) as f:
-                        content = f.read()
-                        path = abspath.replace(".jack", ".xml")
-                        single_file = File(name, path, content)
-                        opened_files.append(single_file)
-        else:
-            print("File or Directory doesn't exist.")
-            quit()
-
-        return opened_files
+    function void test() {  // Added to test Jack syntax that is not use in
+        var int i, j;       // the Square files.
+        var String s;
+        var Array a;
+        if (i) {
+            let s = i;
+            let s = j;
+            let a[i] = j;
+        }
+        else {              // There is no else keyword in the Square files.
+            let i = i;
+            let j = j;
+            let i = i | j;
+        }
+        return;
+    }
+}
+"""
 
 
+def find_matches(pattern, text):
+    matches = pattern.finditer(text)
+    for match in matches:
+        print(dir(match))
+        start, end = match.span()
+        print(text[start:end])
 
-if __name__ == "__main__":
+pattern_standard_comment = re.compile("/\*\b")
+pattern_api_comment = re.compile("/\*\*.*\*/")
+pattern_slash_comment = re.compile("//")
 
-    jackanalyzer = JackAnalyer("Main.jack")
+find_matches(pattern_api_comment, text)
+

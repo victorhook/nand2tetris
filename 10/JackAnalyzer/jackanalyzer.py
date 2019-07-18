@@ -1,6 +1,5 @@
 import os
 
-#import jacktokenizer
 from jacktokenizer import JackTokenizer
 
 class File:
@@ -80,4 +79,3 @@ if __name__ == "__main__":
         while tokenizer.has_more_tokens():
             tokenizer.advance()
 
-            
