@@ -13,6 +13,7 @@ class CompilationEngine:
         self.input = input
         self.row = 0
         self.identation = ''
+        self.TYPE = 'int', 'char', 'boolean'
 
         self.compile_class()
 
@@ -53,7 +54,7 @@ class CompilationEngine:
 
         self.compile_classVarDec()
 
-        self.compile_subroutineDec()
+        self.compile_subroutine()
 
         if self.token.token == '}':
             self.output += self.wrap(self.token.tokentype, self.token.token)
@@ -63,12 +64,10 @@ class CompilationEngine:
         self.output += '</class>\n'
 
 
-    def compile_subroutineDec(self):
-        """ Syntax: 
-        constructor | function | method
-        void | type  subroutineName '('
-        parameterList ')'
-        subroutineBody
+    def compile_subroutine(self):
+        """ Syntax: (constructor | function | method)
+                    (void | type)  subroutineName '('
+                    parameterList ')' subroutineBody
         """
 
         while not self.next_is('}'):
@@ -82,7 +81,7 @@ class CompilationEngine:
 
             self.advance()
 
-            if self.next_is('void', 'int', 'char', 'boolean'):
+            if self.next_is(self.TYPE):
                 self.output += self.wrap(self.token.tokentype, self.token.token)
             else:
                 self.error('void or type')
@@ -105,9 +104,125 @@ class CompilationEngine:
 
             self.compile_parameterList()
 
-            # OTHER STUFF
+            if self.next_is(')'):
+                self.output += self.wrap(self.token.tokentype, self.token.token)
+            else:
+                self.error(')')
+
+            self.advance()
+
+            self.compile_subroutineBody()
 
             self.close_ident('subroutineDec')
+
+
+
+    def compile_subroutineBody(self):
+        """ Syntax: '{' varDec* statements '}' """
+        
+        self.open_ident('subroutineBody')
+
+        if self.next_is('{'):
+            self.output += self.wrap(self.token.tokentype, self.token.token)
+        else:
+            self.error('{')
+
+        self.advance()
+
+        self.compile_varDec()
+
+        self.compile_statements()
+
+        if self.next_is('}'):
+            self.output += self.wrap(self.token.tokentype, self.token.token)
+        else:
+            self.error('}')
+
+        self.close_ident('subroutineBody')
+
+
+    def compile_statements(self):
+        """ statement* 
+            Syntax: letStatement | ifStatement | whileStatement | 
+                    doStatement  | returnStatement
+        """
+
+        if not self.next_is('}'):
+            self.open_ident('statements')
+
+            while not self.next_is('}'):
+
+                self.compile_do()
+                self.compile_if()
+                self.compile_let()
+                self.compile_while()
+                self.compile_return()
+
+            self.close_ident('statements')            
+
+        return
+
+
+    def compile_do(self):
+        """ Syntax: 'do' subroutineCall ';' """
+
+
+    def compile_if(self):
+        """ Syntax: 'if' '(' expression ')' '{' statements '}'
+                     ('else' '{' statements '}')?
+        """
+
+    def compile_let(self):
+        """ Syntax: 'let' varName ('[' expression ']')?
+                    '=' expression ';'
+        """
+
+    def compile_while(self):
+        """ Syntax: 'while' '(' expression ')'
+                    '{' statements '}'
+        """
+
+    def compile_return(self):
+        """ Syntax: 'return' expression? ';' """
+    
+
+
+
+
+    def compile_varDec(self):
+        """ Syntax: 'var' type varName (',' varName)* ';' """
+
+        while not self.next_is('let', 'if', 'while', 'do', 'return'):
+
+            if self.next_is('var'):
+                self.output += self.wrap(self.token.tokentype, self.token.token)
+            else:
+                self.error('var')
+
+            self.advance()
+
+            if self.next_is(self.TYPE):
+                self.output += self.wrap(self.token.tokentype, self.token.token)
+            else:
+                self.error('type')
+                
+            self.advance()
+
+            if self.next_is('identifier', check_type=True):
+                self.output += self.wrap(self.token.tokentype, self.token.token)
+            else:
+                self.error('identifier')
+
+            self.advance()
+
+            self.check_more_varNames()
+
+            if self.next_is(';'):
+                self.output += self.wrap(self.token.tokentype, self.token.token)
+            else:
+                self.error(';')
+
+        return
 
 
 
@@ -118,7 +233,7 @@ class CompilationEngine:
 
             self.open_ident('parameterList')
 
-            if self.next_is('int', 'char', 'boolean'):
+            if self.next_is(self.TYPE):
                 self.output += self.wrap(self.token.tokentype, self.token.token)
             else:
                 self.error('type')
@@ -141,7 +256,7 @@ class CompilationEngine:
 
                 self.advance()
 
-                if self.next_is('int', 'char', 'boolean'):
+                if self.next_is(self.TYPE):
                     self.output += self.wrap(self.token.tokentype, self.token.token)
                 else:
                     self.error('type')
@@ -164,37 +279,38 @@ class CompilationEngine:
     def compile_classVarDec(self):
         """ ('static' | 'field') type varName (',' varName)* '}' """
 
+        while not self.next_is('constructor', 'function', 'method', '}'):
+                    
+            if self.next_is('field', 'static'):
+                self.open_ident('classVarDec')
+                self.output += self.wrap(self.token.tokentype, self.token)
+            else:
+                return
+            
+            self.advance()
 
-        if self.next_is('field', 'static'):
-            self.open_ident('classVarDec')
-            self.output += self.wrap(self.token.tokentype, self.token)
-        else:
-            return
-        
-        self.advance()
+            if self.next_is(self.TYPE):
+                self.output += self.wrap(self.token.tokentype, self.token.token)
+            else:
+                self.error('type')
 
-        if self.next_is('int', 'char', 'boolean'):
-            self.output += self.wrap(self.token.tokentype, self.token.token)
-        else:
-            self.error('type')
+            self.advance()
 
-        self.advance()
+            if self.next_is('identifier', check_type=True):
+                self.output += self.wrap(self.token.tokentype, self.token.token)
+            else:
+                self.error('varName')
 
-        if self.next_is('identifier', check_type=True):
-            self.output += self.wrap(self.token.tokentype, self.token.token)
-        else:
-            self.error('varName')
+            self.advance()
 
-        self.advance()
+            self.check_more_varNames()
 
-        self.check_more_varNames()
+            if self.next_is(';'):
+                self.output += self.wrap(self.token.tokentype, self.token)
 
-        if self.next_is(';'):
-            self.output += self.wrap(self.token.tokentype, self.token)
+            self.close_ident('classVarDec')
 
-        self.close_ident('classVarDec')
-
-        self.advance()
+            self.advance()
 
         return
 
@@ -238,6 +354,13 @@ class CompilationEngine:
             return self.token.tokentype == *args
 
         for arg in args:
+            # Special handling for type tokens
+            if arg == self.TYPE:
+                for _type in arg:
+                    if (self.token.token == _type or 
+                        self.token.tokentype == 'identifier'):
+                        return True
+
             return self.token.token == arg
 
     def error(self, expected):

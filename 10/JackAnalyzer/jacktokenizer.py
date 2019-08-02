@@ -295,7 +295,11 @@ if __name__ == "__main__":
         while tokenizer.has_more_tokens():
             token = tokenizer.advance()
             token.token, token.tokentype = jackanalyzer.xml_check(token.token, token.tokentype)        
-            print(token)
+            tokens.append(token)
+
+        compilation_engine = CompilationEngine(tokens)
+
+        
 
 
 
